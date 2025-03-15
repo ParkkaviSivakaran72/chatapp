@@ -4,6 +4,7 @@ import Chat from './pages/chat'
 import ProfileUpdate from './pages/profileUpdate'
 import { Route,Routes } from 'react-router-dom'
 
+
 const App = () => {
   return (
     <div>

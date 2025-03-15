@@ -42,9 +42,11 @@ const Chatbox = () => {
           className="ml-auto w-6 h-6 cursor-pointer"
         />
       </div>
+      <hr />
 
       <div className="flex-1 overflow-y-auto mb-4 p-4">
         {/* Chat message from the user */}
+
         <div className="flex items-start mb-4">
           <img
             src={assets.profile_img}
@@ -72,7 +74,10 @@ const Chatbox = () => {
       </div>
 
       {/* Send message section */}
-      <div className="flex items-center mt-auto">
+      <div class="flex mt-4">
+        <p class="text-gray-700 text-m italic">typing...</p>
+      </div>
+      <div className="mt-4 flex items-center mt-auto">
         <input
           type="text"
           placeholder="Send a message"

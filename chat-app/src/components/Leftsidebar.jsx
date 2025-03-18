@@ -30,7 +30,7 @@ const chats = [
 
 const Leftsidebar = () => {
   return (
-    <div className="h-screen w-80 bg-gradient-to-r from-blue-500 to-purple-600 text-white flex flex-col p-4 shadow-lg">
+    <div className="h-screen w-80 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex flex-col p-4 shadow-2xl rounded-lg backdrop-blur-lg bg-opacity-30 border border-white/20 ">
       {/* Logo & Menu Icon */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-2">
@@ -42,22 +42,22 @@ const Leftsidebar = () => {
 
       {/* Search Bar */}
       <div className="relative mb-6">
-        <img src={assets.search_icon} alt="Search" className="absolute left-3 top-3 w-5 h-5 text-gray-500" />
+        <img src={assets.search_icon} alt="Search" className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
         <input
           type="text"
           placeholder="Search your chats..."
-          className="w-full pl-10 pr-4 py-2 rounded-lg bg-white text-gray-700 outline-none"
+          className="w-full pl-10 pr-4 py-2 rounded-lg bg-white bg-opacity-20 text-white outline-none border border-white/30 focus:ring-2 focus:ring-purple-400 placeholder-gray-300"
         />
       </div>
 
       {/* Chats List - Dynamically Rendered */}
-      <div className="overflow-y-auto space-y-2 ">
+      <div className="overflow-y-auto space-y-2">
         {chats.map((chat) => (
           <div
             key={chat.id}
-            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-700 cursor-pointer transition duration-300"
+            className="flex items-center space-x-3 p-3 rounded-lg bg-white bg-opacity-10 backdrop-blur-md hover:bg-opacity-20 cursor-pointer transition duration-300 border border-transparent hover:border-white/30 shadow-lg"
           >
-            <img src={chat.image} alt={chat.name} className="w-12 h-12 rounded-full" />
+            <img src={chat.image} alt={chat.name} className="w-12 h-12 rounded-full border border-white/30 shadow-sm" />
             <div>
               <p className="font-semibold">{chat.name}</p>
               <span className="text-sm text-gray-300">{chat.message}</span>

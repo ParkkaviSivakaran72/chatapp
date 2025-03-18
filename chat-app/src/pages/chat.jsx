@@ -7,22 +7,23 @@ const Chat = () => {
   
 
   return (
-    <div className="flex min-h-screen">
-      {/* Left Sidebar */}
-      <div className="w-1/4 p-4 bg-gray-100">
-        <Leftsidebar />
-      </div>
+    <div className="flex h-screen w-screen overflow-hidden">
+  {/* Left Sidebar */}
+  <div className="w-2/8 h-full  p-4 ">
+    <Leftsidebar />
+  </div>
 
-      {/* Chatbox */}
-      <div className="w-1/2 p-4 bg-white">
-        <Chatbox />
-      </div>
+  {/* Chatbox */}
+  <div className="w-3/4 h-full p-4 mr-4">
+    <Chatbox />
+  </div>
+</div>
 
-      {/* Right Sidebar */}
-      <div className="w-1/4 p-4 bg-gray-100">
+      /* Right Sidebar */
+      /* <div className="w-1/4 p-4 bg-gray-100">
         <Rightsidebar />
-      </div>
-    </div>
+      </div> */
+    
   )
 }
 

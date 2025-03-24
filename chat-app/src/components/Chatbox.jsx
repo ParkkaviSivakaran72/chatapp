@@ -3,6 +3,7 @@ import assets from "../assets/assets";
 
 const Chatbox = () => {
   const [time, setTime] = useState("");
+  const [search,setSearch] = useState(false)
 
   useEffect(() => {
     const updateTime = () => {
@@ -18,6 +19,8 @@ const Chatbox = () => {
   }, []);
 
   return (
+
+
     <div className="flex h-screen w-screen bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden ">
       
 
@@ -40,8 +43,23 @@ const Chatbox = () => {
           <img
             src={assets.search_icon}
             alt="Search"
-            className="ml-auto w-6 h-6 cursor-pointer"
+            className="absolute top-2 right-2 ml-auto w-6 h-6 cursor-pointer"
+            onClick={() => setSearch(!search)}
           />
+          {search && (
+            <div className="absolute mb-6 right-2 top-10" >
+            <img
+              src={assets.search_icon}
+              alt="Search"
+              className="absolute left-3 top-3 w-5 h-5 text-gray-400"
+            />
+            <input
+              type="text"
+              placeholder="Search your chats..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg bg-white bg-opacity-20 text-white outline-none border border-white/30 focus:ring-2 focus:ring-purple-400 placeholder-gray-300"
+            />
+          </div>
+          )}
         </div>
 
         <hr className="border-white border-opacity-30" />

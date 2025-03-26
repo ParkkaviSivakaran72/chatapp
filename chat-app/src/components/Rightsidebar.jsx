@@ -1,5 +1,6 @@
 import React from 'react';
 import assets from '../assets/assets';
+import { logout } from '../config/firebase';
 
 const Rightsidebar = () => {
   return (
@@ -35,7 +36,7 @@ const Rightsidebar = () => {
       
       {/* Logout Section */}
       <div className="mt-6 text-center">
-        <button className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300">
+        <button onClick = {() => logout()} className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-300">
           Logout
         </button>
       </div>

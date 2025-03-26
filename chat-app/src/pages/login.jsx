@@ -1,8 +1,22 @@
 import React, { useState } from "react";
 import Assets from "../assets/assets.js";
+import { signup,login } from "../config/firebase.js";
 
 const Login = () => {
   const [currentState, setCurrentState] = useState("Sign up");
+  const [userName,setUserName] = useState("");
+  const [email,setEmail] = useState("");
+  const [password,setPassword] = useState("");
+
+  const onsubmitHandler = (event) => {
+    event.preventDefault();
+    if(currentState === "Sign up"){
+      signup(userName,email,password);
+    }
+    else{
+      login(email,password);
+    }
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
@@ -11,13 +25,15 @@ const Login = () => {
           <img src={Assets.logo_big} alt="Logo" className="w-24 h-24" />
         </div>
 
-        <form className="space-y-4">
+        <form onSubmit = {onsubmitHandler} className="space-y-4">
           <h2 className="text-2xl font-bold text-center text-gray-700">
             {currentState}
           </h2>
 
           {currentState === "Sign up" && (
             <input
+              onChange = {(event) => setUserName(event.target.value)}
+              value = {userName}
               type="text"
               placeholder="Username"
               required
@@ -26,6 +42,8 @@ const Login = () => {
           )}
 
           <input
+            onChange = {(event) => setEmail(event.target.value)}
+            value = {email}
             type="email"
             placeholder="Email address"
             required
@@ -33,6 +51,8 @@ const Login = () => {
           />
 
           <input
+            onChange = {(event) => setPassword(event.target.value)}
+            value = {password}
             type="password"
             placeholder="Password"
             required

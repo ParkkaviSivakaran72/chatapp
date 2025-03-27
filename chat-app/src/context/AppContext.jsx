@@ -1,6 +1,7 @@
-import { doc, getDoc } from "firebase/firestore";
-import { createContext, useState } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { createContext, useDeferredValue, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { db } from "../config/firebase";
 
 export const AppContext = createContext();
 
@@ -22,9 +23,19 @@ const AppContextProvider = (props) => {
             else{
                 navigate('/profileupdate')
             }
+            await updateDoc(userReference,{
+                lastSeen:Date.now()
+            })
+            setInterval(async() => {
+                if(auth.chatUser){
+                    await updateDoc(userReference,{
+                        lastSeen:Date.now()
+                    })
+                }
+            },60000)
 
         } catch (error) {
-            
+            console.log(error);
         }
         
     }

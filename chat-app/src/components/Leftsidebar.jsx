@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import assets from "../assets/assets";
+import { useNavigate } from "react-router-dom";
 
 const chats = [
   {
@@ -30,6 +31,7 @@ const chats = [
 
 const Leftsidebar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <div className="h-screen w-80 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex flex-col p-4 shadow-2xl rounded-lg backdrop-blur-lg bg-opacity-30 border border-white/20 ">
       {/* Logo & Menu Icon */}
@@ -50,9 +52,9 @@ const Leftsidebar = () => {
         {/* Dropdown Menu */}
         {menuOpen && (
           <div className="absolute top-10 right-0 bg-gray-700 shadow-lg rounded-lg p-2 w-32 border">
-            <p className="cursor-pointer hover:bg-gray-400 p-2 rounded" onClick={() => setMenuOpen(false)}>Edit Profile</p>
+            <p className="cursor-pointer hover:bg-gray-400 p-2 rounded" onClick={() => {setMenuOpen(false),navigate('/profileupdate')}}>Edit Profile</p>
             <hr />
-            <p className="cursor-pointer hover:bg-gray-400 p-2 rounded text-red-300" onClick={() => setMenuOpen(false)}>Logout</p>
+            <p className="cursor-pointer hover:bg-gray-400 p-2 rounded text-red-300" onClick={() => {setMenuOpen(false),navigate('/')}}>Logout</p>
           </div>)}
       </div>
 

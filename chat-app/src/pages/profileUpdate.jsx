@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import assets from "../assets/assets";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -6,6 +6,7 @@ import { auth, db } from "../config/firebase";
 // import {upload} from "../lib/upload.js";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
 
 const ProfileUpdate = () => {
   const [image, setImage] = useState(false);
@@ -13,6 +14,7 @@ const ProfileUpdate = () => {
   const [bio, setBio] = useState("");
   const [uid, setUid] = useState("");
   const [previousImage, setPreviousImage] = useState("");
+  const {setUserData} = useContext(AppContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +63,9 @@ const ProfileUpdate = () => {
         name: name,
         biography: bio,
       });
+      const snap = await getDoc(docReference);
+      setUserData(snap.data());
+
       navigate('/chat')
       toast.success("Profile updated successfully!");
     } catch (error) {

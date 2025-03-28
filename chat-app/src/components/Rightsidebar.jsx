@@ -1,10 +1,12 @@
 import React from 'react';
 import assets from '../assets/assets';
 import { logout } from '../config/firebase';
+import { useNavigate } from 'react-router-dom';
 
 const Rightsidebar = () => {
+  const navigate = useNavigate();
   return (
-    <div className="w-80 bg-white shadow-md rounded-lg p-4">
+    <div className="w-80 bg-white shadow-md rounded-lg p-4 cursor-pointer" onClick={() => navigate('/profileupdate')}>
       {/* Profile Section */}
       <div className="flex flex-col items-center border-b pb-4">
         <img 

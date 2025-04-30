@@ -37,6 +37,7 @@ const signup = async (username,email,password) => {
           chat:[]
         })
     } catch (error) {
+      console.log(error)
       console.error(error)
       toast.error(error.code.split('/')[1].split('-').join(' '))
         

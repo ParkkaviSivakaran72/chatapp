@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import assets from "../assets/assets";
 import { useNavigate } from "react-router-dom";
-import { doc, getDocs } from "firebase/firestore";
+import { doc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../config/firebase";
+import { collection } from "firebase/firestore";
 
 const chats = [
   {
@@ -48,7 +49,7 @@ const inputHandler = async (e) => {
       console.log(querySnap.docs[0].data());
     }
   } catch (error) {
-    
+    console.log(error)
   }
 }
 

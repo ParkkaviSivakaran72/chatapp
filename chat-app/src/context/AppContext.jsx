@@ -3,6 +3,8 @@ import { createContext, useDeferredValue, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../config/firebase";
 
+
+
 export const AppContext = createContext();
 
 const AppContextProvider = (props) => {
@@ -13,6 +15,12 @@ const AppContextProvider = (props) => {
         try {
             const userReference = doc(db, "users", uid)
             const userSnap = await getDoc(userReference)
+            if (!userSnap.exists()) {
+                console.warn("User document does not exist!");
+                return;
+              }
+          
+          
             const userData = userSnap.data();
             setUserData(userData);
            console.log(userData)

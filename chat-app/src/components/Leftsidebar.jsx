@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import assets from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import { doc, getDocs } from "firebase/firestore";
+import { db } from "../config/firebase";
 
 const chats = [
   {
@@ -32,6 +34,24 @@ const chats = [
 const Leftsidebar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+const inputHandler = async (e) => {
+  try {
+    const input = e.target.value;
+    
+    const userReference = collection(db,'users');
+    
+    const userQuery = query(userReference,where("username","==",input.toLowerCase()));
+    console.log(userQuery)
+    const querySnap = await getDocs(userQuery);
+    console.log(querySnap)
+    if(!querySnap.empty){
+      console.log(querySnap.docs[0].data());
+    }
+  } catch (error) {
+    
+  }
+}
+
   return (
     <div className="h-screen w-80 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex flex-col p-4 shadow-2xl rounded-lg backdrop-blur-lg bg-opacity-30 border border-white/20 ">
       {/* Logo & Menu Icon */}
@@ -59,13 +79,14 @@ const Leftsidebar = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="relative mb-6">
+      <div className="relative mb-6" >
         <img
           src={assets.search_icon}
           alt="Search"
           className="absolute left-3 top-3 w-5 h-5 text-gray-400"
         />
         <input
+          onChange = {inputHandler}
           type="text"
           placeholder="Search your chats..."
           className="w-full pl-10 pr-4 py-2 rounded-lg bg-white bg-opacity-20 text-white outline-none border border-white/30 focus:ring-2 focus:ring-purple-400 placeholder-gray-300"

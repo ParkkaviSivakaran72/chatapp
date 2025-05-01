@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import assets from "../assets/assets";
 import { useNavigate } from "react-router-dom";
-import { doc, getDocs, query, where } from "firebase/firestore";
+import { arrayUnion, doc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { collection } from "firebase/firestore";
+import { AppContext } from "../context/AppContext";
 
 const chats = [
   {
@@ -35,23 +36,77 @@ const chats = [
 const Leftsidebar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-const inputHandler = async (e) => {
-  try {
-    const input = e.target.value;
-    
-    const userReference = collection(db,'users');
-    
-    const userQuery = query(userReference,where("username","==",input.toLowerCase()));
-    console.log(userQuery)
-    const querySnap = await getDocs(userQuery);
-    console.log(querySnap)
-    if(!querySnap.empty){
-      console.log(querySnap.docs[0].data());
+  const { userData } = useContext(AppContext);
+  const [user, setUser] = useState(null);
+  const [showSearch, setshowSearch] = useState(false);
+  const inputHandler = async (e) => {
+    try {
+      const input = e.target.value;
+      if (input) {
+        setshowSearch(true)
+        const userReference = collection(db, "users");
+
+        const userQuery = query(
+          userReference,
+          where("username", "==", input.toLowerCase())
+        );
+        
+        const querySnap = await getDocs(userQuery);
+        
+
+        if (!querySnap.empty ) { //&& querySnap.docs[0].data().id !== userData.id
+          setUser(querySnap.docs[0].data());
+        }
+        else{
+          setUser(null)
+        }
+        
+      }
+      else{
+        setshowSearch(false)
+      }
+    } catch (error) {
+      console.log(error);
     }
-  } catch (error) {
-    console.log(error)
+  };
+
+  const addChat = async () => {
+    if (!user || !user.id ) {
+      console.warn("Missing user data, cannot create chat.");
+      return;
+    }
+
+    const messageReference = collection(db,'messages');
+    const chatsReference = collection(db,'chats');
+    
+    try {
+      const newMessageReference = doc(messageReference);
+      await setDoc(newMessageReference,{
+        createAt:serverTimestamp(),
+        messages:[]
+      })
+      await updateDoc(doc(chatsReference,user.id),{
+        chat:arrayUnion({
+          messageId:newMessageReference.id,
+          lastMessage:"",
+          rID:userData.id,
+          updatedAt:Date.now(),
+          messageSeen:true
+        })
+      })
+      await updateDoc(doc(chatsReference,userData.id),{
+        chat:arrayUnion({
+          messageId:newMessageReference.id,
+          lastMessage:"",
+          rID:user.id,
+          updatedAt:Date.now(),
+          messageSeen:true
+        })
+      })
+    } catch (error) {
+      console.log(error)
+    }
   }
-}
 
   return (
     <div className="h-screen w-80 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex flex-col p-4 shadow-2xl rounded-lg backdrop-blur-lg bg-opacity-30 border border-white/20 ">
@@ -62,32 +117,47 @@ const inputHandler = async (e) => {
           <h3 className="text-lg font-semibold">ChatWeb</h3>
         </div>
         <div className="absolute top-2 right-2">
-          <img 
-            src={assets.menu_icon} 
-            alt="Menu" 
-            className="w-6 h-6 cursor-pointer" 
+          <img
+            src={assets.menu_icon}
+            alt="Menu"
+            className="w-6 h-6 cursor-pointer"
             onClick={() => setMenuOpen(!menuOpen)}
           />
         </div>
-        
+
         {/* Dropdown Menu */}
         {menuOpen && (
           <div className="absolute top-10 right-0 bg-gray-700 shadow-lg rounded-lg p-2 w-32 border">
-            <p className="cursor-pointer hover:bg-gray-400 p-2 rounded" onClick={() => {setMenuOpen(false),navigate('/profileupdate')}}>Edit Profile</p>
+            <p
+              className="cursor-pointer hover:bg-gray-400 p-2 rounded"
+              onClick={() => {
+                setMenuOpen(false), navigate("/profileupdate");
+              }}
+            >
+              Edit Profile
+            </p>
             <hr />
-            <p className="cursor-pointer hover:bg-gray-400 p-2 rounded text-red-300" onClick={() => {setMenuOpen(false),navigate('/')}}>Logout</p>
-          </div>)}
+            <p
+              className="cursor-pointer hover:bg-gray-400 p-2 rounded text-red-300"
+              onClick={() => {
+                setMenuOpen(false), navigate("/");
+              }}
+            >
+              Logout
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Search Bar */}
-      <div className="relative mb-6" >
+      <div className="relative mb-6">
         <img
           src={assets.search_icon}
           alt="Search"
           className="absolute left-3 top-3 w-5 h-5 text-gray-400"
         />
         <input
-          onChange = {inputHandler}
+          onChange={inputHandler}
           type="text"
           placeholder="Search your chats..."
           className="w-full pl-10 pr-4 py-2 rounded-lg bg-white bg-opacity-20 text-white outline-none border border-white/30 focus:ring-2 focus:ring-purple-400 placeholder-gray-300"
@@ -96,7 +166,13 @@ const inputHandler = async (e) => {
 
       {/* Chats List - Dynamically Rendered */}
       <div className="overflow-y-auto space-y-2">
-        {chats.map((chat) => (
+      {
+        showSearch && user ? <div onClick = {addChat} className="flex items-center space-x-3 p-3 rounded-lg bg-white bg-opacity-10 backdrop-blur-md hover:bg-opacity-20 cursor-pointer transition duration-300 border border-transparent hover:border-white/30 shadow-lg"
+>
+          {/* <img src={user.avatar} alt="" /> */}
+          <p>{user.name}</p>
+        </div> :
+        chats.map((chat) => (
           <div
             key={chat.id}
             className="flex items-center space-x-3 p-3 rounded-lg bg-white bg-opacity-10 backdrop-blur-md hover:bg-opacity-20 cursor-pointer transition duration-300 border border-transparent hover:border-white/30 shadow-lg"
@@ -111,7 +187,9 @@ const inputHandler = async (e) => {
               <span className="text-sm text-gray-300">{chat.message}</span>
             </div>
           </div>
-        ))}
+        ))
+      }
+        
       </div>
     </div>
   );

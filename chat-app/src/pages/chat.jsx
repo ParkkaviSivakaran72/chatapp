@@ -1,27 +1,25 @@
-import React from 'react';
-import Leftsidebar from '../components/Leftsidebar';
-import Chatbox from '../components/Chatbox';
-import Rightsidebar from '../components/Rightsidebar';
+import React from "react";
+import LeftSidebar from "../components/Leftsidebar";
+import Chatbox from "../components/Chatbox";
+import Rightsidebar from "../components/rightsidebar";
 
-const Chat = () => {
+const Chat = ({ currentUser }) => {
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="flex h-screen w-screen bg-gray-100 overflow-hidden">
       {/* Left Sidebar */}
-      <div className="w-1/4 h-full p-4 bg-gray-50 border-r">
-        <Leftsidebar />
+      <div className="w-72 min-w-[260px] bg-white border-r shadow-sm">
+        <LeftSidebar currentUser={currentUser} />
       </div>
 
       {/* Chatbox */}
-      <div className="flex-1 h-full p-4">
-        <Chatbox />
+      <div className="flex-1 flex flex-col bg-gradient-to-br from-indigo-500 to-purple-600">
+        <Chatbox currentUser={currentUser} />
       </div>
 
-      {/* Right Sidebar (uncomment if needed) */}
-      {/*
-      <div className="w-1/4 h-full p-4 bg-gray-100 border-l">
-        <Rightsidebar />
-      </div>
-      */}
+      {/* Right Sidebar
+      <div className="w-72 min-w-[260px] bg-white border-l shadow-sm">
+        <Rightsidebar currentUser={currentUser} />
+      </div> */}
     </div>
   );
 };

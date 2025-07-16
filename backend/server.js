@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import connectDB  from './config/mongodb.js';
 import dotenv from 'dotenv';
+import connectCloudinary from './config/cloudinary.js';
+import userRouter from './routers/userrouter.js';
 
 dotenv.config();
 
@@ -14,6 +16,9 @@ app.use(cors());
 
 
 connectDB();
+connectCloudinary();
+
+app.use('/api/user',userRouter)
 
 app.get('/',(req,res) => {
     console.log("Server is running");

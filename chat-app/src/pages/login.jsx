@@ -1,35 +1,50 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Assets from "../assets/assets.js";
+import { useNavigate } from "react-router-dom";
+import { set } from "mongoose";
 
 const Login = () => {
   const [currentState, setCurrentState] = useState("Sign up");
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const onsubmitHandler = async (event) => {
     event.preventDefault();
 
     try {
       if (currentState === "Sign up") {
-        const response = await axios.post("http://localhost:5000/api/auth/signup", {
+        const response = await axios.post("http://localhost:3000/api/user/signup", {
           username: userName,
           email,
           password,
         });
-        alert(response.data.message);
+        if(response.data.success) {
+          navigate('/chat')
+          setUserName("");
+          setEmail("");
+          setPassword("");
+        }
+
       } else {
-        const response = await axios.post("http://localhost:5000/api/auth/login", {
+        const response = await axios.post("http://localhost:3000/api/user/login", {
           email,
           password,
         });
-        alert("Login successful");
+        if(response.data.success){
+          navigate('/chat');
+          setEmail("");
+          setPassword("");
+        }
+        
         // Store token in localStorage or cookie
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("usertoken", response.data.token);
       }
     } catch (error) {
       console.error("Error:", error.response?.data?.message || error.message);
+      console.log(error);
       alert(error.response?.data?.message || "Something went wrong");
     }
   };

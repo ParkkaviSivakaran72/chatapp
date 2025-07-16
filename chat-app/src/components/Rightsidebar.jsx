@@ -34,13 +34,13 @@ const Rightsidebar = ({ currentUser }) => {
 
   return (
     <div
-      className="w-80 bg-white shadow-md rounded-lg p-4"
+      className="w-80 h-screen bg-white shadow-md rounded-lg p-4"
       onClick={() => navigate("/profileupdate")}
     >
       {/* Profile Section */}
       <div className="flex flex-col items-center border-b pb-4">
         <img
-          src={profile?.avatarUrl || assets.profile_img}
+          src={profile?.pic2 || assets.pic1}
           alt="Profile"
           className="w-20 h-20 rounded-full border-2 border-green-500"
         />

@@ -1,22 +1,38 @@
 import React, { useState } from "react";
+import axios from "axios";
 import Assets from "../assets/assets.js";
-import { signup,login } from "../config/firebase.js";
 
 const Login = () => {
   const [currentState, setCurrentState] = useState("Sign up");
-  const [userName,setUserName] = useState("");
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const onsubmitHandler = (event) => {
+  const onsubmitHandler = async (event) => {
     event.preventDefault();
-    if(currentState === "Sign up"){
-      signup(userName,email,password);
+
+    try {
+      if (currentState === "Sign up") {
+        const response = await axios.post("http://localhost:5000/api/auth/signup", {
+          username: userName,
+          email,
+          password,
+        });
+        alert(response.data.message);
+      } else {
+        const response = await axios.post("http://localhost:5000/api/auth/login", {
+          email,
+          password,
+        });
+        alert("Login successful");
+        // Store token in localStorage or cookie
+        localStorage.setItem("token", response.data.token);
+      }
+    } catch (error) {
+      console.error("Error:", error.response?.data?.message || error.message);
+      alert(error.response?.data?.message || "Something went wrong");
     }
-    else{
-      login(email,password);
-    }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
@@ -25,15 +41,15 @@ const Login = () => {
           <img src={Assets.logo_big} alt="Logo" className="w-24 h-24" />
         </div>
 
-        <form onSubmit = {onsubmitHandler} className="space-y-4">
+        <form onSubmit={onsubmitHandler} className="space-y-4">
           <h2 className="text-2xl font-bold text-center text-gray-700">
             {currentState}
           </h2>
 
           {currentState === "Sign up" && (
             <input
-              onChange = {(event) => setUserName(event.target.value)}
-              value = {userName}
+              onChange={(event) => setUserName(event.target.value)}
+              value={userName}
               type="text"
               placeholder="Username"
               required
@@ -42,8 +58,8 @@ const Login = () => {
           )}
 
           <input
-            onChange = {(event) => setEmail(event.target.value)}
-            value = {email}
+            onChange={(event) => setEmail(event.target.value)}
+            value={email}
             type="email"
             placeholder="Email address"
             required
@@ -51,8 +67,8 @@ const Login = () => {
           />
 
           <input
-            onChange = {(event) => setPassword(event.target.value)}
-            value = {password}
+            onChange={(event) => setPassword(event.target.value)}
+            value={password}
             type="password"
             placeholder="Password"
             required

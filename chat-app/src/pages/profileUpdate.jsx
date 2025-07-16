@@ -1,81 +1,70 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import assets from "../assets/assets";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../config/firebase";
-// import {upload} from "../lib/upload.js";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { AppContext } from "../context/AppContext";
 
 const ProfileUpdate = () => {
-  const [image, setImage] = useState(false);
+  const [image, setImage] = useState(null);
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
-  const [uid, setUid] = useState("");
   const [previousImage, setPreviousImage] = useState("");
-  const {setUserData} = useContext(AppContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUid(user.uid);
-        const docReference = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docReference);
-        if (docSnap.data().name) {
-          setName(docSnap.data().name);
-        }
-        if (docSnap.data().biography) {
-          setBio(docSnap.data().biography);
-        }
-        if (docSnap.data().avatar) {
-          setPreviousImage(docSnap.data().avatar);
-        }
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:5000/api/users/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = res.data;
+        setName(data.name || "");
+        setBio(data.biography || "");
+        setPreviousImage(data.avatar || "");
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load profile.");
       }
-    });
+    };
+
+    fetchProfile();
   }, []);
 
   const profileUpdate = async (event) => {
     event.preventDefault();
-    try {
-      // if (!previousImage && !image) {
-      //   toast.error("Upload your profile photo");
-      //   return;
-      // }
-  
-      if (!uid) {
-        toast.error("User not found.");
-        return;
-      }
-  
-      const docReference = doc(db, "users", uid);
-  
-      // let imageURL = previousImage; // Default to existing image
-  
-      if (image) {
-        // imageURL = await upload(image); // Wait for upload to complete
-        // setPreviousImage(imageURL);
-      }
-  
-      await updateDoc(docReference, {
-        // avatar: imageURL,
-        name: name,
-        biography: bio,
-      });
-      const snap = await getDoc(docReference);
-      setUserData(snap.data());
 
-      navigate('/chat')
+    try {
+      const token = localStorage.getItem("token");
+
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("biography", bio);
+      if (image) {
+        formData.append("avatar", image);
+      }
+
+      await axios.put("http://localhost:5000/api/users/me", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       toast.success("Profile updated successfully!");
+      navigate("/chat");
     } catch (error) {
-      toast.error(error.message || "Failed to update profile.");
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to update profile.");
     }
   };
-  
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600">
-      <form onSubmit={profileUpdate} action="">
+      <form onSubmit={profileUpdate}>
         <div className="bg-white p-6 rounded-lg shadow-lg w-96 flex flex-col items-center">
           <label htmlFor="avatar" className="cursor-pointer">
             <input
@@ -86,8 +75,11 @@ const ProfileUpdate = () => {
               onChange={(e) => setImage(e.target.files[0])}
             />
             <img
-               src={image ? URL.createObjectURL(image) : previousImage || assets.avatar_icon}
-
+              src={
+                image
+                  ? URL.createObjectURL(image)
+                  : previousImage || assets.avatar_icon
+              }
               alt="avatar"
               className="w-24 h-24 rounded-full border-2 border-gray-300 hover:border-gray-500 transition duration-300"
             />

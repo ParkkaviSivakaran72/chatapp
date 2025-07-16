@@ -1,198 +1,118 @@
-import React, { useContext, useState } from "react";
-import assets from "../assets/assets";
-import { useNavigate } from "react-router-dom";
-import { arrayUnion, doc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore";
-import { db } from "../config/firebase";
-import { collection } from "firebase/firestore";
-import { AppContext } from "../context/AppContext";
+// components/LeftSidebar.jsx
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const chats = [
-  {
-    id: 1,
-    name: "Piranu",
-    message: "Hi, How are you?",
-    image: assets.profile_img,
-  },
-  {
-    id: 2,
-    name: "John Doe",
-    message: "Let's catch up later!",
-    image: assets.profile_img,
-  },
-  {
-    id: 3,
-    name: "Alice",
-    message: "Did you complete the task?",
-    image: assets.profile_img,
-  },
-  {
-    id: 4,
-    name: "Charlie",
-    message: "Hey, are you free now?",
-    image: assets.profile_img,
-  },
-];
+const LeftSidebar = ({ currentUser, onSelectChat }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [chats, setChats] = useState([]);
 
-const Leftsidebar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const { userData } = useContext(AppContext);
-  const [user, setUser] = useState(null);
-  const [showSearch, setshowSearch] = useState(false);
-  const inputHandler = async (e) => {
+  // Fetch chats on load
+  useEffect(() => {
+    const fetchChats = async () => {
+      if (!currentUser) return;
+
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:5000/api/chats", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setChats(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchChats();
+  }, [currentUser]);
+
+  const handleSearch = async () => {
     try {
-      const input = e.target.value;
-      if (input) {
-        setshowSearch(true)
-        const userReference = collection(db, "users");
-
-        const userQuery = query(
-          userReference,
-          where("username", "==", input.toLowerCase())
-        );
-        
-        const querySnap = await getDocs(userQuery);
-        
-
-        if (!querySnap.empty ) { //&& querySnap.docs[0].data().id !== userData.id
-          setUser(querySnap.docs[0].data());
-        }
-        else{
-          setUser(null)
-        }
-        
-      }
-      else{
-        setshowSearch(false)
-      }
-    } catch (error) {
-      console.log(error);
+      const res = await axios.get(
+        `http://localhost:5000/api/users/search?username=${encodeURIComponent(searchTerm)}`
+      );
+      setSearchResults(res.data);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const addChat = async () => {
-    if (!user || !user.id ) {
-      console.warn("Missing user data, cannot create chat.");
-      return;
-    }
-
-    const messageReference = collection(db,'messages');
-    const chatsReference = collection(db,'chats');
-    
+  const handleSelectUser = async (selectedUserId) => {
     try {
-      const newMessageReference = doc(messageReference);
-      await setDoc(newMessageReference,{
-        createAt:serverTimestamp(),
-        messages:[]
-      })
-      await updateDoc(doc(chatsReference,user.id),{
-        chat:arrayUnion({
-          messageId:newMessageReference.id,
-          lastMessage:"",
-          rID:userData.id,
-          updatedAt:Date.now(),
-          messageSeen:true
-        })
-      })
-      await updateDoc(doc(chatsReference,userData.id),{
-        chat:arrayUnion({
-          messageId:newMessageReference.id,
-          lastMessage:"",
-          rID:user.id,
-          updatedAt:Date.now(),
-          messageSeen:true
-        })
-      })
-    } catch (error) {
-      console.log(error)
+      const token = localStorage.getItem("token");
+      // Create chat or return existing
+      const res = await axios.post(
+        "http://localhost:5000/api/chats",
+        { recipientId: selectedUserId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Refresh chats
+      const chatsRes = await axios.get("http://localhost:5000/api/chats", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setChats(chatsRes.data);
+
+      // Select the chat
+      onSelectChat(res.data._id);
+    } catch (err) {
+      console.error(err);
     }
-  }
+  };
 
   return (
-    <div className="h-screen w-80 bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex flex-col p-4 shadow-2xl rounded-lg backdrop-blur-lg bg-opacity-30 border border-white/20 ">
-      {/* Logo & Menu Icon */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-2">
-          <img src={assets.logo_icon} alt="Logo" className="w-8 h-8" />
-          <h3 className="text-lg font-semibold">ChatWeb</h3>
-        </div>
-        <div className="absolute top-2 right-2">
-          <img
-            src={assets.menu_icon}
-            alt="Menu"
-            className="w-6 h-6 cursor-pointer"
-            onClick={() => setMenuOpen(!menuOpen)}
-          />
-        </div>
-
-        {/* Dropdown Menu */}
-        {menuOpen && (
-          <div className="absolute top-10 right-0 bg-gray-700 shadow-lg rounded-lg p-2 w-32 border">
-            <p
-              className="cursor-pointer hover:bg-gray-400 p-2 rounded"
-              onClick={() => {
-                setMenuOpen(false), navigate("/profileupdate");
-              }}
-            >
-              Edit Profile
-            </p>
-            <hr />
-            <p
-              className="cursor-pointer hover:bg-gray-400 p-2 rounded text-red-300"
-              onClick={() => {
-                setMenuOpen(false), navigate("/");
-              }}
-            >
-              Logout
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Search Bar */}
-      <div className="relative mb-6">
-        <img
-          src={assets.search_icon}
-          alt="Search"
-          className="absolute left-3 top-3 w-5 h-5 text-gray-400"
-        />
+    <div className="p-4 bg-white bg-opacity-10 backdrop-blur rounded-lg shadow-md">
+      <div className="mb-4">
         <input
-          onChange={inputHandler}
           type="text"
-          placeholder="Search your chats..."
-          className="w-full pl-10 pr-4 py-2 rounded-lg bg-white bg-opacity-20 text-white outline-none border border-white/30 focus:ring-2 focus:ring-purple-400 placeholder-gray-300"
+          placeholder="Search user"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border rounded mb-2"
         />
+        <button
+          onClick={handleSearch}
+          className="w-full bg-blue-500 text-white py-1 rounded"
+        >
+          Search
+        </button>
       </div>
-
-      {/* Chats List - Dynamically Rendered */}
-      <div className="overflow-y-auto space-y-2">
-      {
-        showSearch && user ? <div onClick = {addChat} className="flex items-center space-x-3 p-3 rounded-lg bg-white bg-opacity-10 backdrop-blur-md hover:bg-opacity-20 cursor-pointer transition duration-300 border border-transparent hover:border-white/30 shadow-lg"
->
-          {/* <img src={user.avatar} alt="" /> */}
-          <p>{user.name}</p>
-        </div> :
-        chats.map((chat) => (
-          <div
-            key={chat.id}
-            className="flex items-center space-x-3 p-3 rounded-lg bg-white bg-opacity-10 backdrop-blur-md hover:bg-opacity-20 cursor-pointer transition duration-300 border border-transparent hover:border-white/30 shadow-lg"
+      <ul className="mb-4">
+        {searchResults.map((user) => (
+          <li
+            key={user._id}
+            onClick={() => handleSelectUser(user._id)}
+            className="cursor-pointer p-2 hover:bg-blue-100 rounded"
           >
-            <img
-              src={chat.image}
-              alt={chat.name}
-              className="w-12 h-12 rounded-full border border-white/30 shadow-sm"
-            />
-            <div>
-              <p className="font-semibold">{chat.name}</p>
-              <span className="text-sm text-gray-300">{chat.message}</span>
-            </div>
-          </div>
-        ))
-      }
-        
-      </div>
+            {user.username}
+          </li>
+        ))}
+      </ul>
+      <h3 className="text-lg font-semibold mb-2">Your Chats</h3>
+      <ul>
+        {chats.map((chat) => {
+          const otherUser = chat.users.find((u) => u._id !== currentUser._id);
+          return (
+            <li
+              key={chat._id}
+              onClick={() => onSelectChat(chat._id)}
+              className="cursor-pointer p-2 hover:bg-blue-100 rounded"
+            >
+              Chat with: {otherUser?.username || "Unknown"}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 };
 
-export default Leftsidebar;
+export default LeftSidebar;

@@ -1,5 +1,4 @@
-// models/chatterModel.js
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const chatterSchema = new mongoose.Schema({
   name: {
@@ -19,6 +18,6 @@ const chatterSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-chatterModel= mongoose.models.Chatter || mongoose.model("Chatter", chatterSchema);
+const chatterModel= mongoose.models.Chatter || mongoose.model("Chatter", chatterSchema);
 
 export default chatterModel;

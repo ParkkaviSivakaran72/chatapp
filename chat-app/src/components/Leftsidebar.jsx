@@ -5,15 +5,13 @@ import { BiAddToQueue } from "react-icons/bi";
 import assets from "../assets/assets";
 import { faker } from "@faker-js/faker";
 
-
 const LeftSidebar = ({ currentUser, onSelectChat }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [chats, setChats] = useState([]);
   const [showAddUserOverlay, setShowAddUserOverlay] = useState(false);
   const [newUserName, setNewUserName] = useState("");
-const [newUserPhone, setNewUserPhone] = useState("");
-
+  const [newUserPhone, setNewUserPhone] = useState("");
 
   // Fetch chats on load
   useEffect(() => {
@@ -32,6 +30,18 @@ const [newUserPhone, setNewUserPhone] = useState("");
     fetchChats();
   }, [currentUser]);
 
+
+  useEffect(() => {
+    const fetchChatters = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/api/chat/getChatter");
+        setChats(res.data);
+      } catch (err) {
+        console.error("Error fetching chatters:", err);
+      }
+    }
+  },[])
+
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
     try {
@@ -46,27 +56,25 @@ const [newUserPhone, setNewUserPhone] = useState("");
     }
   };
 
-  const handleAddUser = async (selectedUserId) => {
+  const handleAddUser = async () => {
+    if (!newUserName || !newUserPhone) return;
+
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        "http://localhost:5000/api/chats",
-        { recipientId: selectedUserId },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      // Refresh chats
-      const chatsRes = await axios.get("http://localhost:5000/api/chats", {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await axios.post("http://localhost:3000/api/chat/chatter", {
+        name: newUserName,
+        phoneNumber: newUserPhone,
       });
-      setChats(chatsRes.data);
-      onSelectChat(res.data._id);
+
+      console.log("User added:", res.data);
       setShowAddUserOverlay(false);
-      setSearchTerm("");
-      setSearchResults([]);
+      setNewUserName("");
+      setNewUserPhone("");
+      // You might refresh chat list or give a toast here
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Error adding user:",
+        err.response?.data?.message || err.message
+      );
     }
   };
 
@@ -214,7 +222,6 @@ const [newUserPhone, setNewUserPhone] = useState("");
                 onChange={(e) => setNewUserPhone(e.target.value)}
                 className="w-full px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              
             </div>
 
             <button

@@ -5,6 +5,7 @@ import connectDB  from './config/mongodb.js';
 import dotenv from 'dotenv';
 import connectCloudinary from './config/cloudinary.js';
 import userRouter from './routers/userrouter.js';
+import chatterRouter from './routers/chatterRouter.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ connectDB();
 connectCloudinary();
 
 app.use('/api/user',userRouter)
+app.use('/api/chat', chatterRouter);
 
 app.get('/',(req,res) => {
     console.log("Server is running");
